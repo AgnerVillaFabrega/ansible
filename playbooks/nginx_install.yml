@@ -1,6 +1,6 @@
 ---
 - name: Instalar Nginx en servidores web
-  hosts: dev
+  hosts: all
   become: true
   tasks:
     - name: Actualizar paquetes

@@ -1,5 +1,5 @@
 ---
-- name: Crear usuarios con contraseña default
+- name: Crear usuarios con contraseña default y acceso sudo
   hosts: all
   become: true
 
@@ -8,7 +8,7 @@
     - ../vars/default_password.yml
 
   tasks:
-    - name: Crear usuarios con contraseña default
+    - name: Crear usuarios con home, shell y contraseña
       user:
         name: "{{ item.name }}"
         comment: "{{ item.full_name }}"
@@ -16,6 +16,8 @@
         shell: /bin/bash
         state: present
         create_home: yes
+        groups: sudo
+        append: yes
       loop: "{{ users }}"
 
     - name: Forzar cambio de contraseña al iniciar sesión

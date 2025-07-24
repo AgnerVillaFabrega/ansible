@@ -1,6 +1,6 @@
 ---
 - name: Ejecutar script de configuración
-  hosts: test
+  hosts: all
   become: true
   tasks:
     - name: Copiar script al servidor

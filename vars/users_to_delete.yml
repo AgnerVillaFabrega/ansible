@@ -1,0 +1,4 @@
+# vars/users_to_delete.yml
+users_to_delete:
+  - usuario1
+  - usuario2
