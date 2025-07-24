@@ -1,0 +1,13 @@
+---
+- name: Instalar Nginx en servidores web
+  hosts: dev
+  become: true
+  tasks:
+    - name: Actualizar paquetes
+      apt:
+        update_cache: yes
+
+    - name: Instalar nginx
+      apt:
+        name: nginx
+        state: present

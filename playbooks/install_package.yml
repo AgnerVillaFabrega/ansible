@@ -1,0 +1,12 @@
+---
+- name: Instalar paquetes básicos
+  hosts: all
+  become: true
+  tasks:
+    - name: Instalar curl y git
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - curl
+        - git

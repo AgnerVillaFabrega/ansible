@@ -1,0 +1,13 @@
+---
+- name: Ejecutar script de configuración
+  hosts: test
+  become: true
+  tasks:
+    - name: Copiar script al servidor
+      copy:
+        src: ../scripts/setup.sh
+        dest: /tmp/setup.sh
+        mode: '0755'
+
+    - name: Ejecutar script
+      shell: /tmp/setup.sh

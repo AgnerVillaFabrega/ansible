@@ -1,0 +1,6 @@
+# vars/users.yml
+users:
+  - name: usuario1
+    full_name: "Usuario Uno"
+  - name: usuario2
+    full_name: "Usuario Dos"
