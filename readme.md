@@ -1,6 +1,122 @@
-# 📘 Guía Rápida de Ansible
+# 📘 Guía de Ansible - Gestión de Configuración de Servidores
 
-## 📁 Inventario y Grupos
+Este repositorio contiene playbooks, configuración de inventario y archivos de variables para tareas de administración de servidores usando Ansible.
+
+## 🚀 Inicio Rápido con Makefile
+
+### 🛠️ Comandos Principales
+```bash
+# Mostrar todos los comandos disponibles
+make help
+
+# Prueba básica de conectividad
+make ping
+
+# Configuración básica (ping + instalar paquetes)
+make setup-basic
+
+# Configuración completa (ping + usuarios + paquetes + nginx)
+make full-setup
+```
+
+### 🔍 Conectividad y Validación
+```bash
+# Probar conexión a todos los servidores
+make ping
+
+# Validar sintaxis de todos los playbooks
+make syntax-check
+
+# Listar todos los hosts del inventario
+make list-hosts
+```
+
+### 👥 Gestión de Usuarios
+```bash
+# Crear usuarios con acceso sudo
+make create-users
+
+# Eliminar usuarios del sistema
+make delete-users
+```
+
+### 📦 Instalación de Paquetes
+```bash
+# Instalar paquetes básicos (curl, git)
+make install-packages
+
+# Instalar y configurar Nginx
+make install-nginx
+```
+
+### ⚙️ Tareas de Configuración
+```bash
+# Ejecutar scripts de configuración
+make run-scripts
+
+# Cambiar MTU de red a 1500
+make change-mtu
+```
+
+### 📊 Monitoreo del Sistema
+```bash
+# Recopilar información del sistema
+make gather-facts
+
+# Verificar tiempo de actividad del servidor
+make uptime
+
+# Verificar uso de disco
+make disk-usage
+
+# Verificar información de memoria
+make memory-info
+```
+
+## 📁 Estructura del Repositorio
+
+```
+├── playbooks/          # Playbooks de Ansible para varias tareas
+├── vars/               # Archivos de variables (usuarios, contraseñas)
+├── scripts/            # Scripts shell ejecutados por playbooks
+├── inventory.ini       # Configuración de inventario
+├── Makefile           # Comandos automatizados
+└── CLAUDE.md          # Instrucciones para Claude Code
+```
+
+### 🗂️ Grupos del Inventario
+- `test` - Servidores de prueba
+- `databases` - Servidores de base de datos
+- `all_servers` - Grupo padre que contiene todos los grupos de servidores
+
+## 📋 Playbooks Disponibles
+
+### 👥 Gestión de Usuarios
+- `create_users.yml` - Crea usuarios con contraseñas por defecto y acceso sudo
+- `delete_users.yml` - Elimina usuarios y sus directorios home
+
+### 📦 Instalación de Paquetes
+- `install_package.yml` - Instala paquetes básicos (curl, git)
+- `nginx_install.yml` - Instala y configura servidor web Nginx
+
+### 🌐 Configuración de Red y Sistema
+- `scripts.yml` - Copia y ejecuta el script setup.sh en servidores objetivo
+- `change_mtu.yml` - Cambia MTU de interfaz de red a 1500 con verificación
+
+## 📂 Archivos de Variables
+
+### 👥 Gestión de Usuarios
+- `vars/users.yml` - Lista de usuarios a crear con sus nombres completos
+- `vars/users_to_delete.yml` - Lista de nombres de usuario a eliminar
+- `vars/default_password.yml` - Contiene contraseña por defecto encriptada SHA512
+
+### 🔐 Generación de Contraseñas
+Para generar nuevas contraseñas encriptadas:
+```bash
+python3 -c "import crypt; print(crypt.crypt('<PASSWORD>', crypt.mksalt(crypt.METHOD_SHA512)))"
+```
+
+## 📁 Inventario y Grupos (Comandos Ansible Directos)
 
 ### 📋 Ver el inventario completo (formato YAML)
 ```bash
@@ -12,20 +128,16 @@ ansible-inventory -i inventory.ini --list -y
 ansible-inventory -i inventory.ini --graph
 ```
 
-### 🧩 Estructura típica del `inventory.ini`
+### 🧩 Estructura del `inventory.ini`
 ```ini
 [test]
 100.100.1.1
-
-[dev-k8s]
-100.100.2.1
 
 [databases]
 100.100.3.1
 
 [all_servers:children]
 test
-dev-k8s
 databases
 
 [all_servers:vars]
@@ -34,10 +146,9 @@ ansible_password={{ ansible_password }}
 ansible_become_password={{ ansible_become_password }}
 ```
 
-También puedes declarar los datos directamente:
+El inventario soporta SSH heredado con:
 ```ini
-[test]
-100.100.1.1 ansible_user=admin ansible_ssh_pass=clave123
+ansible_ssh_common_args='-o HostkeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa -o StrictHostKeyChecking=no'
 ```
 
 ## 🧪 Pruebas de Conectividad
