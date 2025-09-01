@@ -1,0 +1,49 @@
+---
+- name: Cambiar MTU de interfaz de red a 1500
+  hosts: all
+  become: true
+  
+  vars:
+    network_interface: "ens3"
+    new_mtu: 1500
+  
+  tasks:
+    - name: Verificar MTU actual de la interfaz
+      shell: nmcli connection show {{ network_interface }} | grep 802-3-ethernet.mtu
+      register: current_mtu
+      ignore_errors: yes
+    
+    - name: Mostrar MTU actual
+      debug:
+        msg: "MTU actual: {{ current_mtu.stdout }}"
+      when: current_mtu.rc == 0
+    
+    - name: Modificar MTU de la conexión
+      shell: nmcli connection modify {{ network_interface }} 802-3-ethernet.mtu {{ new_mtu }}
+      register: modify_result
+    
+    - name: Activar la conexión con nueva configuración
+      shell: nmcli connection up {{ network_interface }}
+      register: up_result
+    
+    - name: Reiniciar NetworkManager
+      systemd:
+        name: NetworkManager
+        state: restarted
+      register: restart_result
+    
+    - name: Esperar a que la red se estabilice
+      wait_for:
+        timeout: 10
+    
+    - name: Verificar nuevo MTU
+      shell: nmcli connection show {{ network_interface }} | grep 802-3-ethernet.mtu
+      register: new_mtu_check
+      ignore_errors: yes
+    
+    - name: Mostrar resultado final
+      debug:
+        msg: 
+          - "Configuración completada en {{ inventory_hostname }}"
+          - "Nuevo MTU: {{ new_mtu_check.stdout }}"
+      when: new_mtu_check.rc == 0
