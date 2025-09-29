@@ -8,6 +8,20 @@
     - ../vars/default_password.yml
 
   tasks:
+    - name: Verificar si los usuarios ya existen
+      getent:
+        database: passwd
+        key: "{{ item.name }}"
+      register: user_check
+      loop: "{{ users }}"
+      failed_when: false
+
+    - name: Mostrar usuarios existentes
+      debug:
+        msg: "El usuario {{ item.item.name }} ya existe en el sistema"
+      loop: "{{ user_check.results }}"
+      when: item.ansible_facts is defined
+
     - name: Crear usuarios con home, shell y contraseña
       user:
         name: "{{ item.name }}"
@@ -16,10 +30,12 @@
         shell: /bin/bash
         state: present
         create_home: yes
-        groups: sudo
+        groups: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
         append: yes
       loop: "{{ users }}"
+      when: user_check.results | selectattr('item.name', 'equalto', item.name) | selectattr('ansible_facts', 'undefined') | list | length > 0
 
-    - name: Forzar cambio de contraseña al iniciar sesión
+    - name: Forzar cambio de contraseña al iniciar sesión (solo usuarios nuevos)
       command: chage -d 0 {{ item.name }}
       loop: "{{ users }}"
+      when: user_check.results | selectattr('item.name', 'equalto', item.name) | selectattr('ansible_facts', 'undefined') | list | length > 0
